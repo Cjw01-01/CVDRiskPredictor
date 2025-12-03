@@ -41,18 +41,22 @@ if os.path.exists(static_dir):
         raise HTTPException(status_code=404, detail="Frontend not found")
 
 # CORS middleware
-# Allow requests from Hugging Face Space, Netlify, and localhost
-allowed_origins = [
-    "https://*.hf.space",  # Hugging Face Spaces
-    "https://cvdrisk.netlify.app",
-    "https://*.netlify.app",  # All Netlify subdomains
-    "http://localhost:3000",
-    "http://localhost:8000",
-    "http://localhost:7860",  # HF Space local port
-]
+# Allow requests from any origin (for Netlify and HF Space compatibility)
+def allow_all_origins(origin: str) -> bool:
+    """Allow requests from Netlify, HF Spaces, and localhost"""
+    if not origin:
+        return False
+    allowed_patterns = [
+        "https://cvdrisk.netlify.app",
+        "https://.netlify.app",
+        "https://.hf.space",
+        "http://localhost",
+    ]
+    return any(origin.startswith(pattern.replace(".", "")) or pattern.replace(".", "") in origin for pattern in allowed_patterns)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origin_regex=r"https?://(.*\.netlify\.app|.*\.hf\.space|localhost.*)",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
