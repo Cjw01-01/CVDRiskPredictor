@@ -15,9 +15,16 @@ import urllib.request
 app = FastAPI(title="CVD Risk Predictor API")
 
 # CORS middleware
+# Allow requests from Netlify and localhost for development
+allowed_origins = [
+    "https://cvdrisk.netlify.app",
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "*"  # Fallback for any other origins
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your Netlify domain
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
