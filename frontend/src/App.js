@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import './App.css';
 
 // API base URL:
-// - On Netlify: use Netlify Functions (same origin, no CORS)
+// - On Vercel: use /api/predict (serverless function)
+// - On Netlify: use /.netlify/functions/predict
 // - In development: use localhost
 // - Can be overridden via REACT_APP_API_URL env var
 const API_URL =
   process.env.REACT_APP_API_URL ||
   (process.env.NODE_ENV === 'production'
-    ? '/.netlify/functions/predict' // Netlify Functions (same origin)
+    ? '/api/predict' // Vercel serverless function (default)
     : 'http://localhost:8000');
 
 function App() {
