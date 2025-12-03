@@ -1,6 +1,6 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import torch
@@ -15,6 +15,15 @@ import os
 import urllib.request
 
 app = FastAPI(title="CVD Risk Predictor API")
+
+# Add CORS headers to all responses (workaround for HF Spaces)
+@app.middleware("http")
+async def add_cors_header(request, call_next):
+    response = await call_next(request)
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    return response
 
 # Serve static frontend files (for Hugging Face Space deployment)
 static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
