@@ -1,0 +1,10 @@
+backend/
+netlify/
+notebooks/
+*.pth
+*.pt
+*.md
+Dockerfile
+.dockerignore
+railway.json
+
