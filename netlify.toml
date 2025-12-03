@@ -9,12 +9,20 @@
     "netlify/functions/**"
   ]
 
+# Don't redirect function calls - let Netlify handle them
+[[redirects]]
+  from = "/.netlify/functions/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+  force = true
+
 [[redirects]]
   from = "/api/predict"
   to = "/.netlify/functions/predict"
   status = 200
   force = true
 
+# Catch-all for frontend routes (must be last)
 [[redirects]]
   from = "/*"
   to = "/index.html"
