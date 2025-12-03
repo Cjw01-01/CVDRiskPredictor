@@ -45,6 +45,7 @@ if os.path.exists(static_dir):
 allowed_origins = [
     "https://*.hf.space",  # Hugging Face Spaces
     "https://cvdrisk.netlify.app",
+    "https://*.netlify.app",  # All Netlify subdomains
     "http://localhost:3000",
     "http://localhost:8000",
     "http://localhost:7860",  # HF Space local port
