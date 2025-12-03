@@ -9,13 +9,7 @@
     "netlify/functions/**"
   ]
 
-# Don't redirect function calls - let Netlify handle them
-[[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-  force = true
-
+# Redirect /api/predict to function (functions handle their own paths)
 [[redirects]]
   from = "/api/predict"
   to = "/.netlify/functions/predict"
