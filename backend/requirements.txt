@@ -2,10 +2,9 @@ fastapi==0.104.1
 uvicorn[standard]==0.24.0
 python-multipart==0.0.6
 
-# Use a PyTorch version that is available for Python 3.13 on Render.
-# Newer Torch is backward compatible with your saved weights.
+# Use PyTorch versions compatible with Python 3.13 on Render.
 torch==2.5.1
-torchvision==0.20.1
+torchvision==0.24.1
 
 pillow==10.1.0
 numpy>=1.26.0
