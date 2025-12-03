@@ -1,0 +1,13 @@
+{
+  "name": "cvd-risk-predictor",
+  "version": "1.0.0",
+  "description": "CVD Risk Predictor - Full Stack Application",
+  "scripts": {
+    "copy-models": "python netlify/functions/copy_models.py",
+    "build": "cd frontend && npm install && npm run build",
+    "postbuild": "npm run copy-models"
+  },
+  "dependencies": {}
+}
+
+

@@ -1,0 +1,22 @@
+[build]
+  command = "npm run copy-models && cd frontend && npm install && npm run build"
+  publish = "frontend/build"
+
+[functions]
+  directory = "netlify/functions"
+  included_files = [
+    "backend/**",
+    "netlify/functions/**"
+  ]
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/predict/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
