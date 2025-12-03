@@ -7,8 +7,15 @@ backend_dir = os.path.join(current_dir, '../../backend')
 sys.path.insert(0, backend_dir)
 sys.path.insert(0, current_dir)
 
+# For Netlify Functions, models directory is in the same directory as the function
+models_base_dir = current_dir
+
 # Set model paths - download from HF Hub if not present
-models_dir = os.path.join(current_dir, 'models')
+# Try multiple possible locations for models
+models_dir = os.path.join(models_base_dir, 'models')
+if not os.path.exists(models_dir):
+    # Also try in the parent functions directory
+    models_dir = os.path.join(os.path.dirname(models_base_dir), 'models')
 os.makedirs(models_dir, exist_ok=True)
 os.environ['MODEL_DIR'] = models_dir
 
