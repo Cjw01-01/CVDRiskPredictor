@@ -138,9 +138,10 @@ function App() {
     }
 
     try {
-      // For Netlify Functions, the function name is the path
-      const endpoint = API_URL === '/.netlify/functions/predict' 
-        ? '/.netlify/functions/predict' 
+      // For Netlify Functions: /.netlify/functions/predict/predict (function name + FastAPI route)
+      // For external API: http://host/predict
+      const endpoint = API_URL === '/.netlify/functions/predict'
+        ? '/.netlify/functions/predict/predict'
         : `${API_URL}/predict`;
       const response = await fetch(endpoint, {
         method: 'POST',
