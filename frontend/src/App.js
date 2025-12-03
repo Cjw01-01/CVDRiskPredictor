@@ -138,7 +138,11 @@ function App() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/predict`, {
+      // For Netlify Functions, the function name is the path
+      const endpoint = API_URL === '/.netlify/functions/predict' 
+        ? '/.netlify/functions/predict' 
+        : `${API_URL}/predict`;
+      const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
       });

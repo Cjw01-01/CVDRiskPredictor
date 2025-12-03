@@ -10,8 +10,8 @@
   ]
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/predict/:splat"
+  from = "/api/predict"
+  to = "/.netlify/functions/predict"
   status = 200
   force = true
 
