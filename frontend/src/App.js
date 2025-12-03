@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
-// Use Netlify function in production, localhost in development
-const API_URL = process.env.NODE_ENV === 'production' 
-  ? '/.netlify/functions/predict'
-  : (process.env.REACT_APP_API_URL || 'http://localhost:8000');
+// API base URL:
+// - In development: use REACT_APP_API_URL or fallback to local FastAPI backend
+// - In production: prefer REACT_APP_API_URL so we can point to an external backend (Railway/Render)
+const API_URL =
+  process.env.REACT_APP_API_URL ||
+  (process.env.NODE_ENV === 'production'
+    ? 'https://your-backend-url-here' // override via Netlify env
+    : 'http://localhost:8000');
 
 function App() {
   const [activePage, setActivePage] = useState('predict');

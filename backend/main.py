@@ -10,6 +10,7 @@ from typing import Optional, Union
 import base64
 import timm
 import os
+import urllib.request
 
 app = FastAPI(title="CVD Risk Predictor API")
 
@@ -22,25 +23,71 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Model paths - check for Netlify Functions environment
+# Model paths - check for Netlify Functions / custom MODEL_DIR environment
 MODEL_DIR = os.environ.get('MODEL_DIR', '')
 if MODEL_DIR:
     MODEL_PATHS = {
         'hypertension': os.path.join(MODEL_DIR, 'hypertension.pt'),
         'cimt': os.path.join(MODEL_DIR, 'cimt_reg.pth'),
         'vessel': os.path.join(MODEL_DIR, 'vessel.pth'),
-        'fusion': os.path.join(MODEL_DIR, 'fusion_cvd_noskewed.pth')
+        'fusion': os.path.join(MODEL_DIR, 'fusion_cvd_noskewed.pth'),
     }
 else:
     MODEL_PATHS = {
         'hypertension': 'hypertension.pt',
         'cimt': 'cimt_reg.pth',
         'vessel': 'vessel.pth',
-        'fusion': 'fusion_cvd_noskewed.pth'
+        'fusion': 'fusion_cvd_noskewed.pth',
     }
+
+# Optional remote model URLs (for cloud deployment where models are not in the image)
+MODEL_URLS = {
+    'hypertension': os.environ.get('HYPERTENSION_MODEL_URL'),
+    'cimt': os.environ.get('CIMT_MODEL_URL'),
+    'vessel': os.environ.get('VESSEL_MODEL_URL'),
+    'fusion': os.environ.get('FUSION_MODEL_URL'),
+}
 
 # Global model storage
 models = {}
+
+
+def ensure_model_file(model_name: str) -> str:
+    """
+    Ensure the model file exists locally.
+    - If it exists on disk: return the path.
+    - If not, and a MODEL_URL is configured: download it once.
+    """
+    model_path = MODEL_PATHS.get(model_name)
+    if not model_path:
+        raise ValueError(f"Unknown model: {model_name}")
+
+    # Already present
+    if os.path.exists(model_path):
+        return model_path
+
+    # No URL configured – cannot auto-download
+    url = MODEL_URLS.get(model_name)
+    if not url:
+        raise RuntimeError(
+            f"Model file '{model_path}' is missing and no URL is configured.\n"
+            f"Set environment variable for this model (e.g. HYPERTENSION_MODEL_URL) "
+            f"or mount the file into the container."
+        )
+
+    # Make sure directory exists
+    os.makedirs(os.path.dirname(model_path) or ".", exist_ok=True)
+
+    # Download the file
+    try:
+        print(f"Downloading model '{model_name}' from {url} ...")
+        with urllib.request.urlopen(url) as response, open(model_path, "wb") as out_file:
+            out_file.write(response.read())
+        print(f"Downloaded model '{model_name}' to {model_path}")
+    except Exception as e:
+        raise RuntimeError(f"Failed to download model '{model_name}' from {url}: {e}")
+
+    return model_path
 
 
 # ==================== MODEL ARCHITECTURES ====================
@@ -210,9 +257,8 @@ def load_model(model_name: str):
     if model_name in models:
         return models[model_name]
     
-    model_path = MODEL_PATHS.get(model_name)
-    if not model_path:
-        raise ValueError(f"Unknown model: {model_name}")
+    # Ensure the model file exists locally (download if needed in cloud)
+    model_path = ensure_model_file(model_name)
     
     try:
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
