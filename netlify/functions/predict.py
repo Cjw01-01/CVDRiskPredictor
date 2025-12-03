@@ -36,5 +36,12 @@ handler = Mangum(app, lifespan="off")
 
 def lambda_handler(event, context):
     """Netlify Functions entry point"""
-    return handler(event, context)
+    try:
+        return handler(event, context)
+    except Exception as e:
+        import traceback
+        return {
+            "statusCode": 500,
+            "body": f"Function error: {str(e)}\n{traceback.format_exc()}"
+        }
 
