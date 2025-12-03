@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import './App.css';
 
 // API base URL:
-// - On Hugging Face Space: same origin (no CORS needed)
+// - On Netlify: use Netlify Functions (same origin, no CORS)
 // - In development: use localhost
 // - Can be overridden via REACT_APP_API_URL env var
 const API_URL =
   process.env.REACT_APP_API_URL ||
   (process.env.NODE_ENV === 'production'
-    ? '' // Same origin on HF Space
+    ? '/.netlify/functions/predict' // Netlify Functions (same origin)
     : 'http://localhost:8000');
 
 function App() {

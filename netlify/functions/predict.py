@@ -7,11 +7,17 @@ backend_dir = os.path.join(current_dir, '../../backend')
 sys.path.insert(0, backend_dir)
 sys.path.insert(0, current_dir)
 
-# Set model paths to use models in functions directory
+# Set model paths - download from HF Hub if not present
 models_dir = os.path.join(current_dir, 'models')
-if os.path.exists(models_dir):
-    # Update model paths to use local models directory
-    os.environ['MODEL_DIR'] = models_dir
+os.makedirs(models_dir, exist_ok=True)
+os.environ['MODEL_DIR'] = models_dir
+
+# Set model URLs to download from Hugging Face Hub
+HF_REPO = os.environ.get('HF_MODEL_REPO', 'carlwakim/cvd-risk-models')
+os.environ['HYPERTENSION_MODEL_URL'] = os.environ.get('HYPERTENSION_MODEL_URL', f'https://huggingface.co/{HF_REPO}/resolve/main/hypertension.pt')
+os.environ['CIMT_MODEL_URL'] = os.environ.get('CIMT_MODEL_URL', f'https://huggingface.co/{HF_REPO}/resolve/main/cimt_reg.pth')
+os.environ['VESSEL_MODEL_URL'] = os.environ.get('VESSEL_MODEL_URL', f'https://huggingface.co/{HF_REPO}/resolve/main/vessel.pth')
+os.environ['FUSION_MODEL_URL'] = os.environ.get('FUSION_MODEL_URL', f'https://huggingface.co/{HF_REPO}/resolve/main/fusion_cvd_noskewed.pth')
 
 # Import after path setup
 from mangum import Mangum
