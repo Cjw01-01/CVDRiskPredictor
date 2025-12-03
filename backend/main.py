@@ -20,7 +20,6 @@ allowed_origins = [
     "https://cvdrisk.netlify.app",
     "http://localhost:3000",
     "http://localhost:8000",
-    "*"  # Fallback for any other origins
 ]
 app.add_middleware(
     CORSMiddleware,
