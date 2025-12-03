@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import './App.css';
 
 // API base URL:
-// - In development: use REACT_APP_API_URL or fallback to local FastAPI backend
-// - In production: prefer REACT_APP_API_URL so we can point to an external backend (Railway/Render)
+// - On Hugging Face Space: same origin (no CORS needed)
+// - In development: use localhost
+// - Can be overridden via REACT_APP_API_URL env var
 const API_URL =
   process.env.REACT_APP_API_URL ||
   (process.env.NODE_ENV === 'production'
-    ? 'https://your-backend-url-here' // override via Netlify env
+    ? '' // Same origin on HF Space
     : 'http://localhost:8000');
 
 function App() {

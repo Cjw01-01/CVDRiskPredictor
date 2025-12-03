@@ -1,6 +1,8 @@
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 import torch
 import torch.nn as nn
 from PIL import Image
@@ -14,12 +16,38 @@ import urllib.request
 
 app = FastAPI(title="CVD Risk Predictor API")
 
+# Serve static frontend files (for Hugging Face Space deployment)
+static_dir = os.path.join(os.path.dirname(__file__), "..", "static")
+if os.path.exists(static_dir):
+    # Mount static files
+    app.mount("/static", StaticFiles(directory=os.path.join(static_dir, "static")), name="static")
+    # Serve index.html for root and all non-API routes
+    @app.get("/")
+    async def serve_index():
+        index_path = os.path.join(static_dir, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        return {"error": "Frontend not found"}
+    
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        # Don't intercept API routes
+        if full_path.startswith("api") or full_path.startswith("predict") or full_path.startswith("health"):
+            raise HTTPException(status_code=404, detail="Not found")
+        # Serve index.html for React Router
+        index_path = os.path.join(static_dir, "index.html")
+        if os.path.exists(index_path):
+            return FileResponse(index_path)
+        raise HTTPException(status_code=404, detail="Frontend not found")
+
 # CORS middleware
-# Allow requests from Netlify and localhost for development
+# Allow requests from Hugging Face Space, Netlify, and localhost
 allowed_origins = [
+    "https://*.hf.space",  # Hugging Face Spaces
     "https://cvdrisk.netlify.app",
     "http://localhost:3000",
     "http://localhost:8000",
+    "http://localhost:7860",  # HF Space local port
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -46,12 +74,13 @@ else:
         'fusion': 'fusion_cvd_noskewed.pth',
     }
 
-# Optional remote model URLs (for cloud deployment where models are not in the image)
+# Model URLs - default to Hugging Face Hub, can be overridden via env vars
+HF_REPO = os.environ.get('HF_MODEL_REPO', 'carlwakim/cvd-risk-models')
 MODEL_URLS = {
-    'hypertension': os.environ.get('HYPERTENSION_MODEL_URL'),
-    'cimt': os.environ.get('CIMT_MODEL_URL'),
-    'vessel': os.environ.get('VESSEL_MODEL_URL'),
-    'fusion': os.environ.get('FUSION_MODEL_URL'),
+    'hypertension': os.environ.get('HYPERTENSION_MODEL_URL', f'https://huggingface.co/{HF_REPO}/resolve/main/hypertension.pt'),
+    'cimt': os.environ.get('CIMT_MODEL_URL', f'https://huggingface.co/{HF_REPO}/resolve/main/cimt_reg.pth'),
+    'vessel': os.environ.get('VESSEL_MODEL_URL', f'https://huggingface.co/{HF_REPO}/resolve/main/vessel.pth'),
+    'fusion': os.environ.get('FUSION_MODEL_URL', f'https://huggingface.co/{HF_REPO}/resolve/main/fusion_cvd_noskewed.pth'),
 }
 
 # Global model storage
