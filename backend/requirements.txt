@@ -2,8 +2,8 @@ fastapi==0.104.1
 uvicorn[standard]==0.24.0
 python-multipart==0.0.6
 
-# Use PyTorch versions compatible with Python 3.13 on Render.
-torch==2.5.1
+# Use PyTorch + torchvision versions compatible with Python 3.11 on Render.
+torch==2.9.1
 torchvision==0.24.1
 
 pillow==10.1.0
